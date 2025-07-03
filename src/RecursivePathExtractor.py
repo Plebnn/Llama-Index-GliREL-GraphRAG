@@ -47,11 +47,11 @@ def default_parse_recursive_triplets(
             
             
             #head_node = EntityNode(name=head, label=head_type)
-            entities.append((head,head_type))
             #tail_node = EntityNode(name=tail, label=tail_type)
-            entities.append((tail,tail_type))
             #relation_node = Relation(source_id=head_node.id, target_id=tail_node.id, label=relation)
-            #triplets.append((head_node, relation_node, tail_node))
+            #triplets.append((head_node, relation_node, tail_node))            
+            entities.append((head,head_type))
+            entities.append((tail,tail_type))
             relations.append((head,relation,tail))
 
     except json.JSONDecodeError:
@@ -62,13 +62,12 @@ def default_parse_recursive_triplets(
         matches = re.findall(pattern, llm_output)
         
         for match in matches:
-            head, head_type, relation, tail, tail_type = match
             #head_node = EntityNode(name=head, label=head_type)
-            entities.append((head,head_type))
             #tail_node = EntityNode(name=tail, label=tail_type)
-            entities.append((tail,tail_type))
             #relation_node = Relation(source_id=head_node.id, target_id=tail_node.id, label=relation)
-            #triplets.append((head_node, relation_node, tail_node))
+            #triplets.append((head_node, relation_node, tail_node))            
+            entities.append((head,head_type))
+            entities.append((tail,tail_type))
             relations.append((head,relation,tail))
     return entities,relations
 
@@ -236,14 +235,11 @@ class RecursiveLLMPathExtractor(TransformComponent):
             for relation in existing_relations:
                 unique_relations.append([relation.source_id,relation.label,relation.target_id])
 
-        print("after first call")
-        print(unique_entities)
-        print(unique_relations)
 
         extraction_is_complete = await self._check_if_complete(text=text, prompt=DEFAULT_RECURSIVE_CHECK_PROMPT,existing_nodes=unique_entities, existing_relations=unique_relations)
         print(f"Is extraction complete? {extraction_is_complete}")
         count=0
-        while count < self.max_loops and not extraction_is_complete:
+        while count <= self.max_loops and not extraction_is_complete:
             count = count+ 1
             unique_entities, unique_relations = await self._loop_extraction(
                 text=text,
@@ -251,20 +247,13 @@ class RecursiveLLMPathExtractor(TransformComponent):
                 existing_relations= unique_relations,
                 prompt=DEFAULT_RECURSIVE_LOOP_EXTRACT_PROMPT)
             
-            
-            
-           
-            
-
             extraction_is_complete = await self._check_if_complete(text=text, prompt=DEFAULT_RECURSIVE_CHECK_PROMPT,existing_nodes=existing_nodes, existing_relations=existing_relations)
     
             if len(unique_relations) >= self.max_paths_per_chunk:
                 print("max number of relations per chunck found or loop limit reached")
                 extraction_is_complete = True
         
-        print("final")
-        print(unique_entities)
-        print(unique_relations)
+        
         if unique_entities:
                 for entity in unique_entities:
                     existing_nodes.append(
@@ -277,16 +266,16 @@ class RecursiveLLMPathExtractor(TransformComponent):
         else:
             print("NO ENTITIES FOUND FOR THIS NODE!!!")
 
-            if unique_relations:                   # relation looks like this: ('Obama', 'received', 'Ripple of Hope Award')
-                for relation in unique_relations:
-                    existing_relations.append(
-                        Relation(
-                            label=relation[1],
-                            source_id=relation[0],
-                            target_id=relation[2],
-                            properties={},
-                        )
-            )
+        if unique_relations:                   # relation looks like this: ('Obama', 'received', 'Ripple of Hope Award')
+            for relation in unique_relations:
+                existing_relations.append(
+                    Relation(
+                        label=relation[1],
+                        source_id=relation[0],
+                        target_id=relation[2],
+                        properties={},
+                    )
+        )
 
         
         node.metadata[KG_NODES_KEY] = existing_nodes
