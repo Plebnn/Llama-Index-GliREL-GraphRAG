@@ -53,7 +53,7 @@ def extract_rels(
     rels = [
         (" ".join(item["head_text"]), item["label"], " ".join(item["tail_text"]))
         for item in sorted_data_desc
-        #if item["score"] >= threshold           #threshold set for NER to high for rels
+        if item["score"] >= 0.3           #threshold set for NER to high for rels
     ]
     
     unique_ents = set(ents)
