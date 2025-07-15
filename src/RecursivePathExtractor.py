@@ -62,6 +62,7 @@ def default_parse_recursive_triplets(
         matches = re.findall(pattern, llm_output)
         
         for match in matches:
+            head, head_type, relation, tail, tail_type = match
             #head_node = EntityNode(name=head, label=head_type)
             #tail_node = EntityNode(name=tail, label=tail_type)
             #relation_node = Relation(source_id=head_node.id, target_id=tail_node.id, label=relation)
