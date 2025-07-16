@@ -2,47 +2,144 @@ from llama_index.core.prompts.base import PromptTemplate
 from llama_index.core.prompts.prompt_type import PromptType
 
 DEFAULT_ENTITIES = [
-                "Person",
-                "Organization",
-                "Location",
-                "Political Event",
-                "Concept",
-                "Award"
-            ]
-DEFAULT_RELATIONS = {
-        "was President of": {
-            "allowed_head": ["Person"],
-            "allowed_tail": ["Location"]
-        },
-        "was a member of": {
-            "allowed_head": ["Person"],
-            "allowed_tail": ["Organization"]
-        },
-        "married": {
-            "allowed_head": ["Person"],
-            "allowed_tail": ["Person"]
-        },
-        "defeated in election": {
-            "allowed_head": ["Person"],
-            "allowed_tail": ["Person"]
-        },
-        "was Vice President under": {
-            "allowed_head": ["Person"],
-            "allowed_tail": ["Person"]
-        },
-        "authored": {
-            "allowed_head": ["Person"],
-            "allowed_tail": ["Document/Publication"]
-        },
-        "received": {
-            "allowed_head": ["Person"],
-            "allowed_tail": ["Award"]
-        },
-        "visited": {
-            "allowed_head": ["Person"],
-            "allowed_tail": ["Location"]
-        }
+    # Core Entities
+    "PERSON",
+    "ORGANIZATION",
+    "LOCATION",
+    "GPE",          # Geopolitical Entity (countries, cities, states)
+    "PRODUCT",
+
+    # Numerical & Temporal
+    "DATE",
+    "TIME",
+    "MONEY",
+    "QUANTITY",
+
+    # Abstract & Cultural
+    "EVENT",
+]
+
+DEFAULT_RELATIONS = DEFAULT_RELATIONS = {
+    # Person to Person
+    "spouse_of": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["PERSON"]
+    },
+    "child_of": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["PERSON"]
+    },
+    "parent_of": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["PERSON"]
+    },
+    "sibling_of": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["PERSON"]
+    },
+    
+    # Person to Organization
+    "member_of": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["ORGANIZATION"]
+    },
+    "founder_of": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["ORGANIZATION"]
+    },
+    "employee_of": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["ORGANIZATION"]
+    },
+    "CEO_of": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["ORGANIZATION"]
+    },
+
+    # Person to Location/GPE
+    "lives_in": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["LOCATION", "GPE"]
+    },
+    "born_in": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["LOCATION", "GPE"]
+    },
+    "died_in": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["LOCATION", "GPE"]
+    },
+    "leader_of": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["GPE", "ORGANIZATION"]
+    },
+    "visited": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["LOCATION", "GPE"]
+    },
+
+    # Person to Temporal/Numerical
+    "born_on": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["DATE"]
+    },
+    "died_on": {
+        "allowed_head": ["PERSON"],
+        "allowed_tail": ["DATE"]
+    },
+
+    # Organization to Other
+    "headquartered_in": {
+        "allowed_head": ["ORGANIZATION"],
+        "allowed_tail": ["LOCATION", "GPE"]
+    },
+    "founded_on": {
+        "allowed_head": ["ORGANIZATION"],
+        "allowed_tail": ["DATE"]
+    },
+    "subsidiary_of": {
+        "allowed_head": ["ORGANIZATION"],
+        "allowed_tail": ["ORGANIZATION"]
+    },
+    "produces": {
+        "allowed_head": ["ORGANIZATION"],
+        "allowed_tail": ["PRODUCT"]
+    },
+
+    # Location/GPE Relations
+    "capital_of": {
+        "allowed_head": ["GPE", "LOCATION"],
+        "allowed_tail": ["GPE"]
+    },
+    "located_in": {
+        "allowed_head": ["LOCATION", "EVENT", "ORGANIZATION"],
+        "allowed_tail": ["LOCATION", "GPE"]
+    },
+
+    # Event Relations
+    "occurred_on": {
+        "allowed_head": ["EVENT"],
+        "allowed_tail": ["DATE"]
+    },
+    "occurred_at": {
+        "allowed_head": ["EVENT"],
+        "allowed_tail": ["TIME"]
+    },
+    "participant_in": {
+        "allowed_head": ["PERSON", "ORGANIZATION"],
+        "allowed_tail": ["EVENT"]
+    },
+
+    # Product Relations
+    "costs": {
+        "allowed_head": ["PRODUCT"],
+        "allowed_tail": ["MONEY"]
+    },
+    "released_on": {
+        "allowed_head": ["PRODUCT"],
+        "allowed_tail": ["DATE"]
     }
+}
 
 
 DEFAULT_RECURSIVE_START_EXTRACT_TMPL = (
