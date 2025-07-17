@@ -19,7 +19,7 @@ DEFAULT_ENTITIES = [
     "EVENT",
 ]
 
-DEFAULT_RELATIONS = DEFAULT_RELATIONS = {
+DEFAULT_RELATIONS = {
     # Person to Person
     "spouse_of": {
         "allowed_head": ["PERSON"],
