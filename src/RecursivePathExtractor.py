@@ -178,12 +178,14 @@ class RecursiveLLMPathExtractor(TransformComponent):
             prompt,
             text=text,
             exisiting_nodes= str(existing_nodes),
-            exisiting_relations=str(existing_relations))
-            print(llm_response.lower())
-            if llm_response.lower() == "yes":
+            exisiting_relations=str(existing_relations)
+            )
+            
+            if "yes" in llm_response.lower():
                 return True
             return False
         except ValueError:
+            print("Value error in complete check")
             return False
 
     async def _loop_extraction(self, text, prompt,existing_nodes, existing_relations):
@@ -230,7 +232,7 @@ class RecursiveLLMPathExtractor(TransformComponent):
                 text=text,
                 prompt=self.extract_prompt)
         else:
-            print("exisistin relations and entities have been found, skip first extraction loop")
+            print("exisisting relations and entities have been found, skip first extraction loop")
             for entity in existing_nodes:
                 unique_entities.append([entity.name, entity.label])
             for relation in existing_relations:
@@ -249,9 +251,10 @@ class RecursiveLLMPathExtractor(TransformComponent):
                 prompt=DEFAULT_RECURSIVE_LOOP_EXTRACT_PROMPT)
             
             extraction_is_complete = await self._check_if_complete(text=text, prompt=DEFAULT_RECURSIVE_CHECK_PROMPT,existing_nodes=existing_nodes, existing_relations=existing_relations)
-    
+            if extraction_is_complete:
+                print("All nessecary entities have been found for chunk")
             if len(unique_relations) >= self.max_paths_per_chunk:
-                print("max number of relations per chunck found or loop limit reached")
+                print("max number of relations per chunck found")
                 extraction_is_complete = True
         
         
