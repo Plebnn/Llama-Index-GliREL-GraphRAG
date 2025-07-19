@@ -257,7 +257,8 @@ class RecursiveLLMPathExtractor(TransformComponent):
                 print("max number of relations per chunck found")
                 extraction_is_complete = True
         
-        
+        if unique_entities != []:
+            unique_entities = set(unique_entities)
         if unique_entities:
                 for entity in unique_entities:
                     existing_nodes.append(
@@ -270,6 +271,8 @@ class RecursiveLLMPathExtractor(TransformComponent):
         else:
             print("NO ENTITIES FOUND FOR THIS NODE!!!")
 
+        if unique_relations != []:
+            unique_relations = set(unique_relations)
         if unique_relations:                   # relation looks like this: ('Obama', 'received', 'Ripple of Hope Award')
             for relation in unique_relations:
                 existing_relations.append(
