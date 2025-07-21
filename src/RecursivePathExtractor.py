@@ -219,75 +219,67 @@ class RecursiveLLMPathExtractor(TransformComponent):
         """Extract triples from a node."""
         assert hasattr(node, "text")
 
-    
-        existing_nodes = node.metadata.pop(KG_NODES_KEY, [])
-        existing_relations = node.metadata.pop(KG_RELATIONS_KEY, [])    
+        # Get existing data from metadata
+        existing_nodes_objects = node.metadata.pop(KG_NODES_KEY, [])
+        existing_relations_objects = node.metadata.pop(KG_RELATIONS_KEY, [])
         text = node.get_content(metadata_mode=MetadataMode.LLM)
         
-        unique_entities= []
-        unique_relations =[]
+        # Use sets to store unique raw triplets and prevent duplicates
+        # Initialize with existing data if present
+        unique_entities = {(e.name, e.label) for e in existing_nodes_objects}
+        unique_relations = {(r.source_id, r.label, r.target_id) for r in existing_relations_objects}
 
-        if existing_nodes == [] or existing_relations == []: # condition, too little 
-            unique_entities, unique_relations = await self._start_extraction(
+        # Initial extraction if no data exists
+        if not existing_nodes_objects and not existing_relations_objects:
+            new_entities, new_relations = await self._start_extraction(
                 text=text,
-                prompt=self.extract_prompt)
-        else:
-            print("exisisting relations and entities have been found, skip first extraction loop")
-            for entity in existing_nodes:
-                unique_entities.append([entity.name, entity.label])
-            for relation in existing_relations:
-                unique_relations.append([relation.source_id,relation.label,relation.target_id])
-
-
-        extraction_is_complete = await self._check_if_complete(text=text, prompt=DEFAULT_RECURSIVE_CHECK_PROMPT,existing_nodes=unique_entities, existing_relations=unique_relations)
-        print(f"Is extraction complete? {extraction_is_complete}")
-        count=0
-        while count <= self.max_loops and not extraction_is_complete:
-            count = count+ 1
-            unique_entities, unique_relations = await self._loop_extraction(
-                text=text,
-                existing_nodes=unique_entities,
-                existing_relations= unique_relations,
-                prompt=DEFAULT_RECURSIVE_LOOP_EXTRACT_PROMPT)
-            
-            extraction_is_complete = await self._check_if_complete(text=text, prompt=DEFAULT_RECURSIVE_CHECK_PROMPT,existing_nodes=existing_nodes, existing_relations=existing_relations)
-            if extraction_is_complete:
-                print("All nessecary entities have been found for chunk")
-            if len(unique_relations) >= self.max_paths_per_chunk:
-                print("max number of relations per chunck found")
-                extraction_is_complete = True
-        
-        if unique_entities != []:
-            unique_entities = set(unique_entities)
-        if unique_entities:
-                for entity in unique_entities:
-                    existing_nodes.append(
-                        EntityNode(
-                            name=entity[0], 
-                            label=entity[1], 
-                            properties={}   
-                        )
+                prompt=self.extract_prompt
             )
-        else:
+            unique_entities.update(new_entities)
+            unique_relations.update(new_relations)
+
+        # Recursive checking and extraction loop
+        count = 0
+        while count < self.max_loops:
+            # Check if the LLM thinks it's done
+            is_complete = await self._check_if_complete(
+                text=text, 
+                prompt=DEFAULT_RECURSIVE_CHECK_PROMPT,
+                existing_nodes=str(list(unique_entities)), 
+                existing_relations=str(list(unique_relations))
+            )
+            print(f"Is extraction complete? {is_complete}")
+            if is_complete or len(unique_relations) >= self.max_paths_per_chunk:
+                if len(unique_relations) >= self.max_paths_per_chunk:
+                    print("Max number of relations per chunk found.")
+                break
+
+            count += 1
+            print(f"Starting extraction loop #{count}")
+            
+            # CORRECTED LOGIC: Update the sets instead of overwriting them
+            new_entities, new_relations = await self._loop_extraction(
+                text=text,
+                existing_nodes=str(list(unique_entities)),
+                existing_relations=str(list(unique_relations)),
+                prompt=DEFAULT_RECURSIVE_LOOP_EXTRACT_PROMPT
+            )
+            unique_entities.update(new_entities)
+            unique_relations.update(new_relations)
+        
+        # Final conversion from raw tuples to LlamaIndex objects
+        final_nodes = [EntityNode(name=e[0], label=e[1]) for e in unique_entities]
+        final_relations = [
+            Relation(source_id=r[0], label=r[1], target_id=r[2])
+            for r in unique_relations
+        ]
+        
+        if not final_nodes:
             print("NO ENTITIES FOUND FOR THIS NODE!!!")
 
-        if unique_relations != []:
-            unique_relations = set(unique_relations)
-        if unique_relations:                   # relation looks like this: ('Obama', 'received', 'Ripple of Hope Award')
-            for relation in unique_relations:
-                existing_relations.append(
-                    Relation(
-                        label=relation[1],
-                        source_id=relation[0],
-                        target_id=relation[2],
-                        properties={},
-                    )
-        )
-
-        
-        node.metadata[KG_NODES_KEY] = existing_nodes
-        node.metadata[KG_RELATIONS_KEY] = existing_relations
-        
+        # Update node metadata
+        node.metadata[KG_NODES_KEY] = final_nodes
+        node.metadata[KG_RELATIONS_KEY] = final_relations
 
         print("node has been analyzed")
         return node
