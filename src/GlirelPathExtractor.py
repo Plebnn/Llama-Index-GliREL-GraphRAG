@@ -47,7 +47,9 @@ def extract_rels(
     sorted_data_desc = sorted(relations, key=lambda x: x["score"], reverse=True)
 
     # Extract entities
-    ents = [(ent.text, ent.label_) for ent in docs[0][0].ents]
+    ents = [
+        (" ".join(ent.text.split()), ent.label_) for ent in docs[0][0].ents
+    ]
 
     # Extract relations
     rels = [
