@@ -225,7 +225,6 @@ class RecursiveLLMPathExtractor(TransformComponent):
         text = node.get_content(metadata_mode=MetadataMode.LLM)
         
         # Use sets to store unique raw triplets and prevent duplicates
-        # Initialize with existing data if present
         unique_entities = {(e.name, e.label) for e in existing_nodes_objects}
         unique_relations = {(r.source_id, r.label, r.target_id) for r in existing_relations_objects}
 
@@ -257,7 +256,6 @@ class RecursiveLLMPathExtractor(TransformComponent):
             count += 1
             print(f"Starting extraction loop #{count}")
             
-            # CORRECTED LOGIC: Update the sets instead of overwriting them
             new_entities, new_relations = await self._loop_extraction(
                 text=text,
                 existing_nodes=str(list(unique_entities)),
@@ -267,15 +265,35 @@ class RecursiveLLMPathExtractor(TransformComponent):
             unique_entities.update(new_entities)
             unique_relations.update(new_relations)
         
-        # Final conversion from raw tuples to LlamaIndex objects
-        final_nodes = [EntityNode(name=e[0], label=e[1]) for e in unique_entities]
-        final_relations = [
-            Relation(source_id=r[0], label=r[1], target_id=r[2])
-            for r in unique_relations
-        ]
+        # --- START: CORRECTED LOGIC ---
+
+        # 1. Create all EntityNode objects and store them in a dict for easy lookup.
+        #    The key is the entity name, the value is the EntityNode object.
+        final_nodes_map = {
+            name: EntityNode(name=name, label=label) for name, label in unique_entities
+        }
+
+        # 2. Create Relation objects using the .id from the nodes in the map.
+        final_relations = []
+        for head_name, rel_label, tail_name in unique_relations:
+            # Ensure both head and tail nodes exist in our map before creating a relation
+            if head_name in final_nodes_map and tail_name in final_nodes_map:
+                source_node = final_nodes_map[head_name]
+                target_node = final_nodes_map[tail_name]
+                final_relations.append(
+                    Relation(
+                        source_id=source_node.id,
+                        target_id=target_node.id,
+                        label=rel_label,
+                    )
+                )
+
+        final_nodes = list(final_nodes_map.values())
         
         if not final_nodes:
             print("NO ENTITIES FOUND FOR THIS NODE!!!")
+
+        # --- END: CORRECTED LOGIC ---
 
         # Update node metadata
         node.metadata[KG_NODES_KEY] = final_nodes

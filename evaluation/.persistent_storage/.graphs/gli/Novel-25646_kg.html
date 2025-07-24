@@ -1,0 +1,250 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 600px;
+                 background-color: #ffffff;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+             #loadingBar {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 width: 100%;
+                 height: 600px;
+                 background-color:rgba(200,200,200,0.8);
+                 -webkit-transition: all 0.5s ease;
+                 -moz-transition: all 0.5s ease;
+                 -ms-transition: all 0.5s ease;
+                 -o-transition: all 0.5s ease;
+                 transition: all 0.5s ease;
+                 opacity:1;
+             }
+
+             #bar {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 width:20px;
+                 height:20px;
+                 margin:auto auto auto auto;
+                 border-radius:11px;
+                 border:2px solid rgba(30,30,30,0.05);
+                 background: rgb(0, 173, 246); /* Old browsers */
+                 box-shadow: 2px 0px 4px rgba(0,0,0,0.4);
+             }
+
+             #border {
+                 position:absolute;
+                 top:10px;
+                 left:10px;
+                 width:500px;
+                 height:23px;
+                 margin:auto auto auto auto;
+                 box-shadow: 0px 0px 4px rgba(0,0,0,0.2);
+                 border-radius:10px;
+             }
+
+             #text {
+                 position:absolute;
+                 top:8px;
+                 left:530px;
+                 width:30px;
+                 height:50px;
+                 margin:auto auto auto auto;
+                 font-size:22px;
+                 color: #000000;
+             }
+
+             div.outerBorder {
+                 position:relative;
+                 top:400px;
+                 width:600px;
+                 height:44px;
+                 margin:auto auto auto auto;
+                 border:8px solid rgba(0,0,0,0.1);
+                 background: rgb(252,252,252); /* Old browsers */
+                 background: -moz-linear-gradient(top,  rgba(252,252,252,1) 0%, rgba(237,237,237,1) 100%); /* FF3.6+ */
+                 background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(252,252,252,1)), color-stop(100%,rgba(237,237,237,1))); /* Chrome,Safari4+ */
+                 background: -webkit-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* Chrome10+,Safari5.1+ */
+                 background: -o-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* Opera 11.10+ */
+                 background: -ms-linear-gradient(top,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* IE10+ */
+                 background: linear-gradient(to bottom,  rgba(252,252,252,1) 0%,rgba(237,237,237,1) 100%); /* W3C */
+                 filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfcfc', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
+                 border-radius:72px;
+                 box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+             }
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+            <div id="loadingBar">
+              <div class="outerBorder">
+                <div id="text">0%</div>
+                <div id="border">
+                  <div id="bar"></div>
+                </div>
+              </div>
+            </div>
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#97c2fc", "id": "Online Distributed Proofreading Team", "label": "Online Distributed Proofreading Team", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "NEW YORK", "label": "NEW YORK", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "PATHFINDER SERIES", "label": "PATHFINDER SERIES", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "CHICAGO", "label": "CHICAGO", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "teacher", "label": "teacher", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Primary Schools", "label": "Primary Schools", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Normal Schools", "label": "Normal Schools", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "you", "label": "you", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "I", "label": "I", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "they", "label": "they", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Rocky Mountains", "label": "Rocky Mountains", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Greely party", "label": "Greely party", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "he", "label": "he", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "my father", "label": "my father", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "He", "label": "He", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "The man", "label": "The man", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "the drinker", "label": "the drinker", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Arctic seas", "label": "Arctic seas", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "them", "label": "them", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "0a152a3a-1e90-429c-af5d-411c7ea846ec", "label": "0a152a3a-1e90-429c-af5d-411c7ea846ec", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "ac19b5d8-f253-4073-87e4-6ac901bb2b40", "label": "ac19b5d8-f253-4073-87e4-6ac901bb2b40", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "5d2bca6c-5f46-4f74-bbb5-d6c24e1be571", "label": "5d2bca6c-5f46-4f74-bbb5-d6c24e1be571", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "26d133cc-bb9b-4f1f-bdec-9cfe6e5a7762", "label": "26d133cc-bb9b-4f1f-bdec-9cfe6e5a7762", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "f7a9516e-2cc7-45a1-b85e-494a13bae90b", "label": "f7a9516e-2cc7-45a1-b85e-494a13bae90b", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "a95a11a4-3f96-4de4-b005-40fccfd14be8", "label": "a95a11a4-3f96-4de4-b005-40fccfd14be8", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "f16db1db-b20a-4008-bc9a-d57d411f7587", "label": "f16db1db-b20a-4008-bc9a-d57d411f7587", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "b316dc12-de1f-4e4e-94bd-8b8ea4138543", "label": "b316dc12-de1f-4e4e-94bd-8b8ea4138543", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "f06ff4c4-c7f0-48a8-8adb-68c1e62f9fab", "label": "f06ff4c4-c7f0-48a8-8adb-68c1e62f9fab", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "acbc1039-c1cb-44ac-a15b-bfe57cf47ab1", "label": "acbc1039-c1cb-44ac-a15b-bfe57cf47ab1", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "4226b953-929b-4ead-a3e3-f46fff8a3b95", "label": "4226b953-929b-4ead-a3e3-f46fff8a3b95", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "805cf4a5-012e-4329-a5f7-a2b1621bf88d", "label": "805cf4a5-012e-4329-a5f7-a2b1621bf88d", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "c7672a06-cd9b-4fa7-a323-976c6fa1f907", "label": "c7672a06-cd9b-4fa7-a323-976c6fa1f907", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "3631f54c-6666-42a8-9f2f-76dcad903bc4", "label": "3631f54c-6666-42a8-9f2f-76dcad903bc4", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "5338700e-935c-443d-9fc6-eff4f69137d9", "label": "5338700e-935c-443d-9fc6-eff4f69137d9", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "3e8c9e77-c9a2-4a16-96a9-09d080182ca8", "label": "3e8c9e77-c9a2-4a16-96a9-09d080182ca8", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "085ef4f0-58da-4aa5-832f-afaba3ec9f8c", "label": "085ef4f0-58da-4aa5-832f-afaba3ec9f8c", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "f7dd0779-894f-406f-8fc3-a63f9b669a04", "label": "f7dd0779-894f-406f-8fc3-a63f9b669a04", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "1ca2c169-888b-4042-aa41-5faf6f6e880a", "label": "1ca2c169-888b-4042-aa41-5faf6f6e880a", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "059e60a5-85db-4571-98dc-131723c389c7", "label": "059e60a5-85db-4571-98dc-131723c389c7", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "bb8536d0-6a11-446d-ac79-3680c0aa6b80", "label": "bb8536d0-6a11-446d-ac79-3680c0aa6b80", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "eccf91c0-07f2-4e66-a7ea-fb1f0a14e630", "label": "eccf91c0-07f2-4e66-a7ea-fb1f0a14e630", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "139e3fc5-f367-40db-9d4e-eaa790d0878d", "label": "139e3fc5-f367-40db-9d4e-eaa790d0878d", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "f839ace0-b7db-48af-a6b2-ecb9b356edb3", "label": "f839ace0-b7db-48af-a6b2-ecb9b356edb3", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "4b2087b5-9472-4d83-a8d2-0e2815028b7c", "label": "4b2087b5-9472-4d83-a8d2-0e2815028b7c", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "2d9b447c-4966-4fc8-9f88-d5ed6ba81707", "label": "2d9b447c-4966-4fc8-9f88-d5ed6ba81707", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "0d7b951f-ef7c-421e-9184-6e309b0cc5c0", "label": "0d7b951f-ef7c-421e-9184-6e309b0cc5c0", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "4a911e40-2c46-4597-9b4a-71d5da4e5e62", "label": "4a911e40-2c46-4597-9b4a-71d5da4e5e62", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "91057adc-ccac-4b7e-b469-30dcacac5e00", "label": "91057adc-ccac-4b7e-b469-30dcacac5e00", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "c8de5a76-7ca3-4df9-878c-a19a09196684", "label": "c8de5a76-7ca3-4df9-878c-a19a09196684", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "a7145436-a44d-4b06-bdb1-88aec6c4c5ed", "label": "a7145436-a44d-4b06-bdb1-88aec6c4c5ed", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "1d416ad9-8cb8-4440-bb58-939619e5de0c", "label": "1d416ad9-8cb8-4440-bb58-939619e5de0c", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "99a57404-827a-45d3-9edc-d819f554866c", "label": "99a57404-827a-45d3-9edc-d819f554866c", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "03fd2970-c5aa-4f97-a795-4572d13d876a", "label": "03fd2970-c5aa-4f97-a795-4572d13d876a", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "70bd8255-0fa4-4563-8b93-112f7cfd6c0a", "label": "70bd8255-0fa4-4563-8b93-112f7cfd6c0a", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "a073f9b1-e5de-439e-a5df-96da72633694", "label": "a073f9b1-e5de-439e-a5df-96da72633694", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "9823a1cb-921e-4ca4-9c02-51468536d6d7", "label": "9823a1cb-921e-4ca4-9c02-51468536d6d7", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "c9d5c56d-ebfd-4bc5-9069-374b7272d3a4", "label": "c9d5c56d-ebfd-4bc5-9069-374b7272d3a4", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "7e0a88d7-d6c0-4804-a7e3-3936e76cdc01", "label": "7e0a88d7-d6c0-4804-a7e3-3936e76cdc01", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "c0632003-25e5-4dff-8547-edc0a57963b9", "label": "c0632003-25e5-4dff-8547-edc0a57963b9", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "d3da5e8a-e036-478d-afc9-1ed50c20118f", "label": "d3da5e8a-e036-478d-afc9-1ed50c20118f", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "9749c47a-2afa-47b7-a910-5a5263f34321", "label": "9749c47a-2afa-47b7-a910-5a5263f34321", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "aa332303-ccb7-4200-800f-66006bd20b60", "label": "aa332303-ccb7-4200-800f-66006bd20b60", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "eec7ee88-170b-4df8-9639-4bc87832e037", "label": "eec7ee88-170b-4df8-9639-4bc87832e037", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "04e88eb0-62d6-49c8-9534-b6feef0040be", "label": "04e88eb0-62d6-49c8-9534-b6feef0040be", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "4dfdd756-11b0-406e-a271-1a33bb9a2d38", "label": "4dfdd756-11b0-406e-a271-1a33bb9a2d38", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "95efcd91-ca5e-4c1c-8c66-9e062e86ac64", "label": "95efcd91-ca5e-4c1c-8c66-9e062e86ac64", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "b75bb0be-62c0-4f5a-8127-a936e9c98c0b", "label": "b75bb0be-62c0-4f5a-8127-a936e9c98c0b", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "1aeb8b09-67e3-455a-ac41-d1ce2fb7f04b", "label": "1aeb8b09-67e3-455a-ac41-d1ce2fb7f04b", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "9ca23d9b-e934-473a-848a-d1a345004295", "label": "9ca23d9b-e934-473a-848a-d1a345004295", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "e842a605-833e-4114-bc99-9db2bb3705bc", "label": "e842a605-833e-4114-bc99-9db2bb3705bc", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "084d4242-4f9f-4d2f-953a-a5b619d489cd", "label": "084d4242-4f9f-4d2f-953a-a5b619d489cd", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "d20bc321-f2e1-48d8-8e0f-7b4aaa546c7e", "label": "d20bc321-f2e1-48d8-8e0f-7b4aaa546c7e", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "dfd1a7f9-58db-45d4-831b-6002eafca17b", "label": "dfd1a7f9-58db-45d4-831b-6002eafca17b", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "public schools", "label": "public schools", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Emmy", "label": "Emmy", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "CHILD\u0027S HEALTH PRIMER", "label": "CHILD\u0027S HEALTH PRIMER", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Massachusetts", "label": "Massachusetts", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "ALCOHOLIC DRINKS", "label": "ALCOHOLIC DRINKS", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "STIMULANTS", "label": "STIMULANTS", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Joseph Cooper", "label": "Joseph Cooper", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Stephen Hope", "label": "Stephen Hope", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "FOOD", "label": "FOOD", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "opium", "label": "opium", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "school-room", "label": "school-room", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "future citizen", "label": "future citizen", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "tobacco", "label": "tobacco", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "children", "label": "children", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "average primary teacher", "label": "average primary teacher", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "alcohol", "label": "alcohol", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "HINGE-JOINTS", "label": "HINGE-JOINTS", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "your coat", "label": "your coat", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "we", "label": "we", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "We", "label": "We", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "hinge-joints", "label": "hinge-joints", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "You", "label": "You", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "two hundred", "label": "two hundred", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "BALL AND SOCKET JOINTS", "label": "BALL AND SOCKET JOINTS", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "front", "label": "front", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "druggist", "label": "druggist", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "acid", "label": "acid", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Twenty-four ribs", "label": "Twenty-four ribs", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "These little spring cushions", "label": "These little spring cushions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Children", "label": "Children", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "elastic cushions", "label": "elastic cushions", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "doctors", "label": "doctors", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "she", "label": "she", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "old people", "label": "old people", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "lady", "label": "lady", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "cellar", "label": "cellar", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Tobacco", "label": "Tobacco", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "shoes", "label": "shoes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "boy", "label": "boy", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Cigarettes", "label": "Cigarettes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "TOBACCO", "label": "TOBACCO", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Wise doctors", "label": "Wise doctors", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "lame lady", "label": "lame lady", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "cigarettes", "label": "cigarettes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "door", "label": "door", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "dinner table", "label": "dinner table", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "yard", "label": "yard", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "little girl", "label": "little girl", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "She", "label": "She", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "barn", "label": "barn", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "drum-stick", "label": "drum-stick", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "blacksmith", "label": "blacksmith", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "house", "label": "house", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "her", "label": "her", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "town", "label": "town", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "central telegraph office", "label": "central telegraph office", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "people", "label": "people", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "your", "label": "your", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "night", "label": "night", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "your mother", "label": "your mother", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "mother", "label": "mother", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "yourselves", "label": "yourselves", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "doctor", "label": "doctor", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "hospital", "label": "hospital", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "ALCOHOL", "label": "ALCOHOL", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Newspapers", "label": "Newspapers", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "drunkard", "label": "drunkard", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "man", "label": "man", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "him", "label": "him", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "cherries", "label": "cherries", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "grape-juice", "label": "grape-juice", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "wine", "label": "wine", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Wine", "label": "Wine", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "warm place", "label": "warm place", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "vats", "label": "vats", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "WINE", "label": "WINE", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "bare-footed men", "label": "bare-footed men", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "person", "label": "person", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Ripe grapes", "label": "Ripe grapes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "GRAPE-JUICE", "label": "GRAPE-JUICE", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Alcohol", "label": "Alcohol", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Cider", "label": "Cider", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "cider", "label": "cider", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "ten cups", "label": "ten cups", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "CIDER", "label": "CIDER", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "sugar", "label": "sugar", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "SUGAR", "label": "SUGAR", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "starch", "label": "starch", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "many thousand pounds", "label": "many thousand pounds", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "spring-time", "label": "spring-time", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "STARCH", "label": "STARCH", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "barley", "label": "barley", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Two boys", "label": "Two boys", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "malt", "label": "malt", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "beer", "label": "beer", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "brewer", "label": "brewer", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "bank", "label": "bank", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "kitchen", "label": "kitchen", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "home", "label": "home", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "whiskey", "label": "whiskey", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "gin", "label": "gin", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "brandy", "label": "brandy", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "rum", "label": "rum", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "childhood", "label": "childhood", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "drinker", "label": "drinker", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "drunkards", "label": "drunkards", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "snuff", "label": "snuff", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "wheat", "label": "wheat", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "potatoes", "label": "potatoes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "cakes of tobacco", "label": "cakes of tobacco", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "corn", "label": "corn", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "FARMER", "label": "FARMER", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "cigars", "label": "cigars", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "One drop", "label": "One drop", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "little boy or girl", "label": "little boy or girl", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Opium", "label": "Opium", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "four or five", "label": "four or five", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "They", "label": "They", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "dentist", "label": "dentist", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "baby", "label": "baby", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "salt", "label": "salt", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "beef", "label": "beef", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "bread and milk", "label": "bread and milk", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "abdomen", "label": "abdomen", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "breakfast", "label": "breakfast", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "chest", "label": "chest", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "milk", "label": "milk", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "A doctor", "label": "A doctor", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "A soldier", "label": "A soldier", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "oat-meal", "label": "oat-meal", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "some", "label": "some", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Your mamma", "label": "Your mamma", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "apples", "label": "apples", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "People", "label": "People", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "candy", "label": "candy", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "street", "label": "street", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "lime", "label": "lime", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "LIME", "label": "LIME", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "food", "label": "food", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "grass", "label": "grass", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "well", "label": "well", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "cisterns", "label": "cisterns", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Muscles", "label": "Muscles", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "eggs", "label": "eggs", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "cold weather", "label": "cold weather", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "SALT", "label": "SALT", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "meat", "label": "meat", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "summer", "label": "summer", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "oat-meal porridge", "label": "oat-meal porridge", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Meat", "label": "Meat", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "farmer", "label": "farmer", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "field", "label": "field", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "butter", "label": "butter", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "oil", "label": "oil", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "CANDY", "label": "CANDY", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "sugar-cane", "label": "sugar-cane", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Candy-makers", "label": "Candy-makers", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Squash", "label": "Squash", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "bread", "label": "bread", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Bread", "label": "Bread", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Butter", "label": "Butter", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Salt", "label": "Salt", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Oranges", "label": "Oranges", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "vegetables", "label": "vegetables", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Grapes", "label": "Grapes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Water", "label": "Water", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Bananas", "label": "Bananas", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Roast beef", "label": "Roast beef", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Peaches", "label": "Peaches", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Potatoes", "label": "Potatoes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Tomatoes", "label": "Tomatoes", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "the cracker", "label": "the cracker", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "swallowing", "label": "swallowing", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "good cook", "label": "good cook", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "it", "label": "it", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "SWALLOWING", "label": "SWALLOWING", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "stomach", "label": "stomach", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "the person", "label": "the person", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "lungs", "label": "lungs", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "dinner", "label": "dinner", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "the food", "label": "the food", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Sugar", "label": "Sugar", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Eggs", "label": "Eggs", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "BEER", "label": "BEER", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "great storm", "label": "great storm", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "the captain", "label": "the captain", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "men", "label": "men", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "China", "label": "China", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "captain", "label": "captain", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "The captain", "label": "The captain", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "money", "label": "money", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "million of dollars", "label": "million of dollars", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "palace", "label": "palace", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "fresh air", "label": "fresh air", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "brain", "label": "brain", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "THE LUNGS", "label": "THE LUNGS", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "fireplace", "label": "fireplace", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "close rooms", "label": "close rooms", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "day-time", "label": "day-time", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "winter", "label": "winter", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "one person", "label": "one person", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "school-time", "label": "school-time", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "morning", "label": "morning", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Any one", "label": "Any one", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "rubbers", "label": "rubbers", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "rubber boots", "label": "rubber boots", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "little boy", "label": "little boy", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "the sun", "label": "the sun", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "alcoholic drinks", "label": "alcoholic drinks", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "CLOTHING", "label": "CLOTHING", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "room", "label": "room", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "party", "label": "party", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "warm room", "label": "warm room", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Seven", "label": "Seven", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "twenty-six men", "label": "twenty-six men", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "nineteen", "label": "nineteen", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "walrus meat", "label": "walrus meat", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "ten cents", "label": "ten cents", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "dollar", "label": "dollar", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "ten days", "label": "ten days", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Money", "label": "Money", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "MONEY", "label": "MONEY", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Lieutenant", "label": "Lieutenant", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "country", "label": "country", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "Jane Andrews", "label": "Jane Andrews", "shape": "dot", "size": 10}, {"color": "#97c2fc", "id": "world", "label": "world", "shape": "dot", "size": 10}]);
+                  edges = new vis.DataSet([{"arrows": "to", "from": "Online Distributed Proofreading Team", "label": "located_in", "to": "NEW YORK", "width": 1}, {"arrows": "to", "from": "Online Distributed Proofreading Team", "label": "produces", "to": "PATHFINDER SERIES", "width": 1}, {"arrows": "to", "from": "Online Distributed Proofreading Team", "label": "located_in", "to": "CHICAGO", "width": 1}, {"arrows": "to", "from": "teacher", "label": "member_of", "to": "Primary Schools", "width": 1}, {"arrows": "to", "from": "teacher", "label": "member_of", "to": "Normal Schools", "width": 1}, {"arrows": "to", "from": "you", "label": "child_of", "to": "I", "width": 1}, {"arrows": "to", "from": "they", "label": "lives_in", "to": "Rocky Mountains", "width": 1}, {"arrows": "to", "from": "they", "label": "member_of", "to": "Greely party", "width": 1}, {"arrows": "to", "from": "he", "label": "parent_of", "to": "my father", "width": 1}, {"arrows": "to", "from": "He", "label": "parent_of", "to": "my father", "width": 1}, {"arrows": "to", "from": "He", "label": "parent_of", "to": "he", "width": 1}, {"arrows": "to", "from": "The man", "label": "parent_of", "to": "my father", "width": 1}, {"arrows": "to", "from": "my father", "label": "parent_of", "to": "he", "width": 1}, {"arrows": "to", "from": "my father", "label": "parent_of", "to": "He", "width": 1}, {"arrows": "to", "from": "the drinker", "label": "lives_in", "to": "Rocky Mountains", "width": 1}, {"arrows": "to", "from": "the drinker", "label": "died_in", "to": "Arctic seas", "width": 1}, {"arrows": "to", "from": "them", "label": "member_of", "to": "Greely party", "width": 1}, {"arrows": "to", "from": "them", "label": "lives_in", "to": "Rocky Mountains", "width": 1}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+                      network.on("stabilizationProgress", function(params) {
+                          document.getElementById('loadingBar').removeAttribute("style");
+                          var maxWidth = 496;
+                          var minWidth = 20;
+                          var widthFactor = params.iterations/params.total;
+                          var width = Math.max(minWidth,maxWidth * widthFactor);
+                          document.getElementById('bar').style.width = width + 'px';
+                          document.getElementById('text').innerHTML = Math.round(widthFactor*100) + '%';
+                      });
+                      network.once("stabilizationIterationsDone", function() {
+                          document.getElementById('text').innerHTML = '100%';
+                          document.getElementById('bar').style.width = '496px';
+                          document.getElementById('loadingBar').style.opacity = 0;
+                          // really clean the dom element
+                          setTimeout(function () {document.getElementById('loadingBar').style.display = 'none';}, 500);
+                      });
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>

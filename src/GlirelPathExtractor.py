@@ -55,7 +55,7 @@ def extract_rels(
     rels = [
         (" ".join(item["head_text"]), item["label"], " ".join(item["tail_text"]))
         for item in sorted_data_desc
-        if item["score"] >= 0.3           #threshold set for NER to high for rels
+        if item["score"] >= 0.4          #threshold set for NER to high for rels
     ]
     
     unique_ents = set(ents)
@@ -101,44 +101,56 @@ class GlirelPathExtractor(TransformComponent):
         self, llama_nodes: list[BaseNode], **kwargs
     ) -> list[BaseNode]:
         for llama_node in llama_nodes:
-            
-            # extract existing relations from node
-            existing_nodes = llama_node.metadata.pop(KG_NODES_KEY, [])
-            existing_relations = llama_node.metadata.pop(KG_RELATIONS_KEY, [])
-
-            # get text from nodes
+            # get text from node
             text = llama_node.get_content(metadata_mode=MetadataMode.LLM)
-                        
-            entities, relations = extract_rels(text=text, entity_types=self.entity_labels,relation_types=self.relation_schema, threshold=0.75, device=self.device)
             
-            if entities:
-                for entity in entities:
-                    existing_nodes.append(
-                        EntityNode(
-                            name=entity[0], 
-                            label=entity[1], 
-                            properties={}   #GliREL does not extract values like description because it is not an llm, to include values like score is not nessecary because of the cut-off value
-                        )
+            # Extract raw entities and relations using your function
+            entities, relations = extract_rels(
+                text=text,
+                entity_types=self.entity_labels,
+                relation_types=self.relation_schema,
+                threshold=0.75,
+                device=self.device
             )
-            else:
+            
+            if not entities:
                 print("NO ENTITIES FOUND FOR THIS NODE!!!")
+                # If there are no entities, we can't have relations, so we can skip the rest
+                llama_node.metadata[KG_NODES_KEY] = []
+                llama_node.metadata[KG_RELATIONS_KEY] = []
+                continue
 
-            if relations:                   # relation looks like this: ('Obama', 'received', 'Ripple of Hope Award')
-                for relation in relations:
-                    existing_relations.append(
-                        Relation(
-                            label=relation[1],
-                            source_id=relation[0],
-                            target_id=relation[2],
-                            properties={},
+            # --- START: CORRECTED LOGIC ---
+
+            # 1. Create a dictionary to map entity names to EntityNode objects for quick lookup.
+            #    This also handles deduplication of nodes.
+            final_nodes_map = {
+                name: EntityNode(name=name, label=label) 
+                for name, label in entities
+            }
+
+            # 2. Create relations by looking up the nodes in the map and using their .id
+            final_relations = []
+            if relations:
+                for head_name, rel_label, tail_name in relations:
+                    # Ensure both the source and target entities were extracted before creating a relation
+                    if head_name in final_nodes_map and tail_name in final_nodes_map:
+                        source_node = final_nodes_map[head_name]
+                        target_node = final_nodes_map[tail_name]
+                        final_relations.append(
+                            Relation(
+                                label=rel_label,
+                                source_id=source_node.id, # Use the unique ID
+                                target_id=target_node.id, # Use the unique ID
+                                properties={},
+                            )
                         )
-            )
             
+            # --- END: CORRECTED LOGIC ---
 
-            # add back to the metadata
-
-            llama_node.metadata[KG_NODES_KEY] = existing_nodes
-            llama_node.metadata[KG_RELATIONS_KEY] = existing_relations
+            # 3. Add the final lists of nodes and relations back to the metadata
+            llama_node.metadata[KG_NODES_KEY] = list(final_nodes_map.values())
+            llama_node.metadata[KG_RELATIONS_KEY] = final_relations
 
         return llama_nodes
 
