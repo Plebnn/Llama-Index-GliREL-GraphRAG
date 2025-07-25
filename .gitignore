@@ -2,4 +2,4 @@
 __pycache__/
 *.py[cod]
 *$py.class
-.storage_context
+evaluation/.persistent_storage
